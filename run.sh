@@ -5,5 +5,5 @@ PERL=`which perl`
 PATH=`echo "$0" | sed -e 's/\(.*\)\/\(.*\)/\1/' -`
 
 cd $PATH > /dev/null
-$PERL epgdownloader.pl
+$PERL epgdownloader.pl $*
 cd - > /dev/null

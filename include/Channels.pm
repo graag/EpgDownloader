@@ -43,11 +43,13 @@ sub new {
 	my $class = shift;
 	my $config = shift;
 	my $plugins = shift;
+	my $config_file = shift;
 	my $self = {};
 	
 	my $fileName = $config->get('CHANNELS_FILE');
 	
 	$self->{'config'} = $config;
+	$self->{'config_file'} = $config_file;
 
 	#read file content
 	open(CHANNELS_FILE, "<$fileName") or die "Cant't open '$fileName' file: $!";
@@ -76,16 +78,20 @@ sub new {
 
 		my $importName = $importOptions;
 		my $importChannel = $importOptions;
+		my $importOptStopFix = 1;
 
 		$importName =~ s/(.*?)NAME="(.*?)"(.*)/$2/i;
 		$importChannel =~ s/(.*?)CHANNEL="(.*?)"(.*)/$2/i;
+		if($importOptions =~ /.*?CORRECT_STOP_TIME="(.*?)".*/i) {
+            $importOptStopFix = $1;
+        }
 		
 		#check if plugin is available
 		next if($availablePlugins !~ /[\s]$importName[\s]/);
 		
 		$importPluginsTree->{$importName} = {} if !exists($importPluginsTree->{$importName});
 		
-		$importPluginsTree->{$importName}->{$importChannel} = [] if !exists($importPluginsTree->{$importName}->{$importChannel});
+		$importPluginsTree->{$importName}->{$importChannel} = {"stop_fix" => $importOptStopFix} if !exists($importPluginsTree->{$importName}->{$importChannel});
 		
 		#special treatment for '+'
 		$exportContent =~ s/\+/\\+/smg;
@@ -105,8 +111,10 @@ sub new {
 			next if($availablePlugins !~ /[\s]$exportName[\s]/);
 			
 			$exportPluginsTree->{$exportName} = {} if !exists($exportPluginsTree->{$exportName});
+			$exportPluginsTree->{$exportName}->{$exportChannel} = {} if !exists($exportPluginsTree->{$exportName}->{$exportChannel});
+			$exportPluginsTree->{$exportName}->{$exportChannel}->{$importName} = [] if !exists($exportPluginsTree->{$exportName}->{$exportChannel}->{$importName});
 		
-			$exportPluginsTree->{$exportName}->{$exportChannel} = {$importName => $importChannel};
+			push(@{$exportPluginsTree->{$exportName}->{$exportChannel}->{$importName}}, $importChannel);
 		}
 	}
 	
@@ -123,22 +131,23 @@ sub convert {
 	
 	#import
 	foreach my $importPluginName (keys(%{$self->{'import'}})) {
-		my $importPlugin = $importPluginName->new($self->{'config'});
+		my $importPlugin = $importPluginName->new($self->{'config'}, $self->{'config_file'});
 		
 		$self->{'import'}->{$importPluginName} = $importPlugin->get($self->{'import'}->{$importPluginName});
 	}
 	
 	#export
 	foreach my $exportPluginName (keys(%{$self->{'export'}})) {
-		my $exportPlugin = $exportPluginName->new($self->{'config'});
+		my $exportPlugin = $exportPluginName->new($self->{'config'}, $self->{'config_file'});
 		my $events = {};
 		
 		foreach my $exportChannelName (keys(%{$self->{'export'}->{$exportPluginName}})) {
-			
+			$events->{$exportChannelName} = [];
 			foreach my $importPluginName (keys(%{$self->{'export'}->{$exportPluginName}->{$exportChannelName}})){
-				my $importChannelName = $self->{'export'}->{$exportPluginName}->{$exportChannelName}->{$importPluginName};
+				foreach my $importChannelName (@{$self->{'export'}->{$exportPluginName}->{$exportChannelName}->{$importPluginName}}) {
 				
-				$events->{$exportChannelName} = $self->{'import'}->{$importPluginName}->{$importChannelName};
+                    push(@{$events->{$exportChannelName}}, @{$self->{'import'}->{$importPluginName}->{$importChannelName}});
+                }
 			}
 		}
 		

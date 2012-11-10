@@ -55,18 +55,24 @@ $|=1;
 
 binmode(STDOUT, ":utf8");
 
+my $config_name = 'config.xml';
+
+if(@ARGV>0) {
+    $config_name = $ARGV[0];
+}
+
 #read config file
-Misc::message("MAIN","Reading config file");
-my $config = ConfigMain->new('config.xml');
+Misc::message("MAIN","Reading config file $config_name");
+my $config = ConfigMain->new($config_name);
 
 #read available plugins
 Misc::message("MAIN","Reading available plugins");
-my $plugins = Plugins->new($config);
+my $plugins = Plugins->new($config, $config_name);
 $plugins->printFound();
 
 #read channels
 Misc::message("MAIN","Reading channels");
-my $channels = Channels->new($config, $plugins->get());
+my $channels = Channels->new($config, $plugins->get(), $config_name);
 
 #run plugins
 Misc::message("MAIN","Running plugins...");
