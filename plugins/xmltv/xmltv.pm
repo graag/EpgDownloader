@@ -5,6 +5,7 @@ use constant GENERATOR_INFO_URL => "http://epgdownloader.sourceforge.net";
 use Date::Format;
 use Date::Parse;
 use plugins::xmltv::include::ConfigXmltv;
+use Encode;
 use strict;
 
 =pod
@@ -30,11 +31,12 @@ Date: march, april 2006
 sub new {
 	my $class = shift;
 	my $config = shift;
+	my $config_file = shift;
 	
 	my $self = {};
 
 	$self->{'config'} = $config;
-	$self->{'plugin_config'} = ConfigXmltv->new('config.xml');
+	$self->{'plugin_config'} = ConfigXmltv->new($config_file);
 	
 	bless($self, $class);
 	return $self;
@@ -58,6 +60,7 @@ sub get {
 				"Cant't open '$fileName' file: $!")
 			&& return $channels;
     binmode(FILE, ":utf8");
+    binmode STDOUT, ":utf8";
 	
 		my $prevLimiter = $/;
 		$/ = undef;
@@ -93,22 +96,32 @@ sub get {
 		
 			my $title = "";
 			$title = $2 if $data =~ /<title(.*?)>(.*?)<\/title>/smi;
+			my $title2 = "";
+			$title2 = $2 if $data =~ /<sub-title(.*?)>(.*?)<\/sub-title>/smi;
 			my $description = "";
 			$description = $2 if $data =~ /<desc(.*?)>(.*?)<\/desc>/smi;
 			my $category = "";
 			$category = $2 if $data =~ /<category(.*?)>(.*?)<\/category>/smi;
+			my $episode = "";
+			$episode = $2 if $data =~ /<episode-num(.*?)>(.*?)<\/episode-num>/smi;
+			my $year = "";
+			$year = $2 if $data =~ /<date(.*?)>(.*?)<\/date>/smi;
 		
 			$title =~ s/&amp;/&/g;
 			$description =~ s/&amp;/&/g;
+			$title2 =~ s/&amp;/&/g;
 		
 			#create event
 			my $event = Event->new();
 			$event->set('start',str2time($start,$startTimeZone));
 			$event->set('stop',str2time($stop,$stopTimeZone));
 			$event->set('title',$title);
+			$event->set('title2',$title2);
 			$event->set('description',$description);
 			$event->set('category',$category);
-		
+			$event->set('episode',$episode);
+			$event->set('year',$episode);
+	
 			#put event to the events array
 			push @{$events}, $event;
 		
@@ -163,23 +176,46 @@ sub save {
 		
 		for(my $i=0; $i <= $#{$channelEvents}; $i++) {
 			my $event = $events->{$channel}->[$i];
-			my $title = HTML::Entities::encode($event->get('title'));
-			my $description = HTML::Entities::encode($event->get('description'));
-			my $description2 = HTML::Entities::encode($event->get('description2'));
+			my $title = $event->get('title');
+			my $title2 = $event->get('title2');
+			my $description = $event->get('description');
+			my $description2 = $event->get('description2');
 			my $start = time2str("%Y%m%d%H%M00",$event->get('start'))." ".$timezone;
 			my $stop = time2str("%Y%m%d%H%M00",$event->get('stop'))." ".$timezone;
-			my $category = HTML::Entities::encode($event->get('category'));
+			my $category = $event->get('category');
+			my $episode = $event->get('episode');
+			my $year = $event->get('year');
+            my $country = $event->get('country');
+            my $length = $event->get('length');
+            my $director = $event->get('director');
+            my @cast = @{$event->get('cast')};
+
+            $title =~ s/&/&amp;/g;
+			$title2 =~ s/&/&amp;/g;
+            $category =~ s/&/&amp;/g;
+            $description =~ s/&/&amp;/g;
+            $description2 =~ s/&/&amp;/g;
 			
-#			$title =~ s/&/&amp;/g;
-#			$description =~ s/&/&amp;/g;
-#			$description2 =~ s/&/&amp;/g;
-			$description.= "\n".$description2 if $description2 !~ /^$/;
+			$description.= ";\n".$description2 if $description2 !~ /^$/;
 			
 			#save channel's event node
 			print FILE "\t<programme channel=\"".$channelId."\" start=\"".$start."\" stop=\"".$stop."\">\n";
 			print FILE "\t\t<title>".$title."</title>\n";
+			print FILE "\t\t<sub-title>".$title2."</sub-title>\n" if $title2 !~ /^$/;
 			print FILE "\t\t<desc>".$description."\n\t\t</desc>\n";
 			print FILE "\t\t<category>".$category."</category>\n" if $category !~ /^$/;
+			print FILE "\t\t<episode-num system=\"xmltv_ns\">".$episode."</episode-num>\n" if $episode !~ /^$/;
+			print FILE "\t\t<date>".$year."</date>\n" if $year !~ /^$/;
+			print FILE "\t\t<country>".$country."</country>\n" if $country !~ /^$/;
+			print FILE "\t\t<length units=\"minutes\">".$length."</length>\n" if $length !~ /^$/;
+			if($director !~ /^$/ or @cast != 0) {
+                print FILE "\t\t<credits>\n";
+                print FILE "\t\t\t<director>".$director."</director>\n" if $director !~ /^$/;
+                for my $actor (@cast) {
+                    print FILE "\t\t\t<actor>".$actor."</actor>\n";
+                }
+                print FILE "\t\t</credits>\n";
+			}
 			print FILE "\t</programme>\n";
 		}
 	}

@@ -37,7 +37,12 @@ sub new {
 		'category'		=> '',
 		'credits'		=> '',
 		'country'		=> '',
-		'date'			=> ''
+		'date'			=> '',
+        'episode'       => '',
+        'year'          => '',
+        'length'        => '',
+        'director'      => '',
+        'cast'          => [],
 	};
 	
 	bless( $self, $class );
