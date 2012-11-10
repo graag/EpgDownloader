@@ -1,0 +1,60 @@
+<CHANNELS>
+    <IMPORT NAME="WP" CHANNEL="TVP 1">
+        <EXPORT NAME="xmltv" CHANNEL="TVP1" />
+    </IMPORT>
+    <IMPORT NAME="WP" CHANNEL="TVP 2">
+        <EXPORT NAME="xmltv" CHANNEL="TVP2" />
+    </IMPORT>
+    <IMPORT NAME="WP" CHANNEL="TVP Info" CORRECT_STOP_TIME="0">
+        <EXPORT NAME="xmltv" CHANNEL="TVPWarszawa" />
+        <EXPORT NAME="xmltv" CHANNEL="TVPLodz" />
+    </IMPORT>
+    <IMPORT NAME="WP" CHANNEL="TVP Warszawa" CORRECT_STOP_TIME="0">
+        <EXPORT NAME="xmltv" CHANNEL="TVPWarszawa" />
+    </IMPORT>
+    <IMPORT NAME="WP" CHANNEL="TVP Łódź" CORRECT_STOP_TIME="0">
+        <EXPORT NAME="xmltv" CHANNEL="TVPLodz" />
+    </IMPORT>
+    <IMPORT NAME="WP" CHANNEL="TVP Historia">
+        <EXPORT NAME="xmltv" CHANNEL="TVPHistoria" />
+    </IMPORT>
+    <IMPORT NAME="WP" CHANNEL="TVP Kultura">
+        <EXPORT NAME="xmltv" CHANNEL="TVPKultura" />
+    </IMPORT>
+    <IMPORT NAME="WP" CHANNEL="TVP Polonia">
+        <EXPORT NAME="xmltv" CHANNEL="TVPPolonia" />
+    </IMPORT>
+    <IMPORT NAME="WP" CHANNEL="TVN">
+        <EXPORT NAME="xmltv" CHANNEL="TVN" />
+    </IMPORT>
+    <IMPORT NAME="WP" CHANNEL="Polsat">
+        <EXPORT NAME="xmltv" CHANNEL="POLSAT" />
+    </IMPORT>
+    <IMPORT NAME="WP" CHANNEL="Polsat Sport News">
+        <EXPORT NAME="xmltv" CHANNEL="POLSATSportNews" />
+    </IMPORT>
+    <IMPORT NAME="WP" CHANNEL="TVN 7">
+        <EXPORT NAME="xmltv" CHANNEL="TVN7" />
+    </IMPORT>
+    <IMPORT NAME="WP" CHANNEL="TV 4">
+        <EXPORT NAME="xmltv" CHANNEL="TV4" />
+    </IMPORT>
+    <IMPORT NAME="WP" CHANNEL="TV6">
+        <EXPORT NAME="xmltv" CHANNEL="TV6" />
+    </IMPORT>
+    <IMPORT NAME="WP" CHANNEL="TV Puls">
+        <EXPORT NAME="xmltv" CHANNEL="PULS" />
+    </IMPORT>
+    <IMPORT NAME="WP" CHANNEL="TV Puls 2">
+        <EXPORT NAME="xmltv" CHANNEL="PULS2" />
+    </IMPORT>
+    <IMPORT NAME="WP" CHANNEL="Eska TV">
+        <EXPORT NAME="xmltv" CHANNEL="ESKA" />
+    </IMPORT>
+    <IMPORT NAME="WP" CHANNEL="TTV">
+        <EXPORT NAME="xmltv" CHANNEL="TTV" />
+    </IMPORT>
+    <IMPORT NAME="WP" CHANNEL="Polo TV">
+        <EXPORT NAME="xmltv" CHANNEL="POLO" />
+    </IMPORT>
+</CHANNELS>
